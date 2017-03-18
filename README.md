@@ -1,3 +1,5 @@
+Disclaimer: the project is not yet complete.
+
 # training-log
 A Spring Boot-based website with elements of jQuery and REST API. Built as a single-page application.
 
