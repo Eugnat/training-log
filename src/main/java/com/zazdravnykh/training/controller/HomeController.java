@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -34,6 +35,14 @@ public class HomeController {
 
 	@RequestMapping(value = "/showExercises", method = RequestMethod.GET)
 	public @ResponseBody List<Exercise> showExercises() {
+
+		return exerciseService.findAll();
+	}
+
+	@RequestMapping(value = "/removeExercise/{inputId}", method = RequestMethod.POST)
+	public @ResponseBody List<Exercise> removeExercise(@PathVariable("inputId") int id) {
+
+		exerciseService.removeExercise(id);
 
 		return exerciseService.findAll();
 	}
