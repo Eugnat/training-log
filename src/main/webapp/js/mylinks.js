@@ -84,25 +84,42 @@ function showTrainingLog(e) {
   
   var $select = $("<select>").addClass("form-control");
   
-  var $divSelect = $("<div>").addClass("col-sm-6");
+  var $divSelect = $("<div>").addClass("col-sm-4");
   
   $select.append($("<option>").val("").text("....."));
-  $select.append($("<option>").val("1").text("one"));
-  $select.append($("<option>").val("2").text("two"));
-  $select.append($("<option>").val("3").text("one"));
   
-  $label.appendTo($div);
-  $select.appendTo($divSelect);
+  $.getJSON("/showExercises", function(data) {
+
+      $.each(data, function(key, exercise) {
+
+        $select.append($("<option>").val(exercise.id).text(exercise.name));
+      });
+      
+      //adds select block to div;
+      $label.appendTo($div);
+      $select.appendTo($divSelect);
+      $divSelect.appendTo($div);
+      
+      $("<input>").attr("type", "number").appendTo($div);
+      
+    });
   
-  $divSelect.appendTo($div);
   
   var $button = $("<input>").attr("type", "button").val("+").addClass("btn btn-primary");
   
   $button.click(addLine);
   
-  $button.appendTo($div);
+  $button.prependTo($form);
   
   $div.appendTo($form);
+  
+  var $saveButton = $("<input>").attr("type", "button").val("Save").addClass("btn btn-primary");
+  
+  $saveButton.click(saveTrainingLog);
+  
+  $saveButton.appendTo($form);
+  
+  $("<p>").attr("id", "saveResult").appendTo($form);
   
   $form.appendTo("#contentArea");
   
@@ -155,7 +172,7 @@ function showAddEntry(e) {
 
 function saveExerciseForm() {
 	
-	if ($("#exerciseName").val() == "")
+	if ($("#exerciseName").val().trim() == "")
 		$("#addExercise").text("Empty string");
 	
 	else {
@@ -188,7 +205,7 @@ function addLine() {
 	
 	var $div = $(".form-group:last").clone();
 	
-	$div.find("input").remove();
+	$div.find("input[type='button']").remove();
 	
 	$div.insertAfter(".form-group:last");
 	 
@@ -208,5 +225,44 @@ function removeExercise(e) {
 	
 	$(id).remove();
 	
+	
+}
+
+function saveTrainingLog() {
+	
+	var s = [];
+    var $options = $("option:selected");
+
+    $.each($options, function() {
+
+    if ($(this).val() != "")
+      {
+    	var trainingSetHelper = {};
+    	trainingSetHelper.id = $(this).val();
+    	
+    	var $number = $(this).parent().parent().next("input[type='number']");
+    	
+    	trainingSetHelper.quantity = $number.val();
+    	s.push(trainingSetHelper);
+      }
+
+  });
+    
+    var jsonString = JSON.stringify(s);
+    console.log(jsonString);
+    
+    $.ajax({
+		method : "POST",
+		url : "/saveTrainingLog",
+		data : jsonString,
+		contentType : "application/json",
+		success: function() {
+			$("#saveResult").text("Training log saved");
+		},
+		error: function() {
+			$("#saveResult").text("Failed to save the training log");
+		}
+	
+	});
 	
 }

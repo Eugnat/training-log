@@ -1,5 +1,6 @@
 package com.zazdravnykh.training.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +12,20 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zazdravnykh.training.entity.Exercise;
+import com.zazdravnykh.training.entity.TrainingDay;
+import com.zazdravnykh.training.entity.TrainingSet;
+import com.zazdravnykh.training.entity.TrainingSetHelper;
 import com.zazdravnykh.training.service.ExerciseService;
+import com.zazdravnykh.training.service.TrainingDayService;
 
 @Controller
 public class HomeController {
 
 	@Autowired
 	ExerciseService exerciseService;
+
+	@Autowired
+	TrainingDayService trainingDayService;
 
 	@RequestMapping("/")
 	public String home() {
@@ -45,6 +53,36 @@ public class HomeController {
 		exerciseService.removeExercise(id);
 
 		return exerciseService.findAll();
+	}
+
+	@RequestMapping(value = "/saveTrainingLog", method = RequestMethod.POST, consumes = "application/json")
+	public @ResponseBody List<TrainingSet> saveTrainingLog(@RequestBody List<TrainingSetHelper> helperList) {
+
+		List<TrainingSet> list = new ArrayList<>();
+
+		for (TrainingSetHelper helper : helperList) {
+			int id = helper.getId();
+			int quantity = helper.getQuantity();
+
+			TrainingSet trainingSet = new TrainingSet();
+
+			Exercise exercise = exerciseService.findOne(id);
+
+			trainingSet.setExercise(exercise);
+			trainingSet.setNumber(quantity);
+
+			list.add(trainingSet);
+
+		}
+
+		TrainingDay trainingDay = new TrainingDay();
+
+		trainingDay.setList(list);
+
+		trainingDayService.saveTrainingDay(trainingDay);
+
+		return list;
+
 	}
 
 }

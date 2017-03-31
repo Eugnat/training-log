@@ -35,4 +35,10 @@ public class ExerciseServiceImpl implements ExerciseService {
 
 	}
 
+	@Override
+	public Exercise findOne(int id) {
+
+		return exerciseDAO.findOne(id);
+	}
+
 }

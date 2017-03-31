@@ -12,4 +12,6 @@ public interface ExerciseService {
 
 	void removeExercise(int id);
 
+	Exercise findOne(int id);
+
 }
