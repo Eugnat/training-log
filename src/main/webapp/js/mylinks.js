@@ -68,27 +68,29 @@ function showExerciseList(e) {
 
 }
 
+//This function displays a training log
 function showTrainingLog(e) {
 
-  e.preventDefault();
+	e.preventDefault();
 
-  $("#contentArea").empty();
+	$("#contentArea").empty();
 
-  $("<p>").text("Training Log").appendTo("#contentArea");
+	$("<p>").text("Training Log").appendTo("#contentArea");
   
-  var $form = $("<form>").addClass("form-horizontal");
+	var $form = $("<form>").addClass("form-horizontal");
   
-  var $div = $("<div>").addClass("form-group");
+	var $div = $("<div>").addClass("form-group");
   
-  var $label = $("<label>").text("Exercise").addClass("control-label col-sm-2");
+	var $label = $("<label>").text("Exercise").addClass("control-label col-sm-2");
   
-  var $select = $("<select>").addClass("form-control");
+	var $select = $("<select>").addClass("form-control");
   
-  var $divSelect = $("<div>").addClass("col-sm-4");
+	var $divSelect = $("<div>").addClass("col-sm-4");
   
-  $select.append($("<option>").val("").text("....."));
+	$select.append($("<option>").val("").text("....."));
   
-  $.getJSON("/showExercises", function(data) {
+	//a request that gets a list of exercises.
+	$.getJSON("/showExercises", function(data) {
 
       $.each(data, function(key, exercise) {
 
@@ -100,32 +102,45 @@ function showTrainingLog(e) {
       $select.appendTo($divSelect);
       $divSelect.appendTo($div);
       
-      $("<input>").attr("type", "number").appendTo($div);
+      $("<input>").attr("type", "number").attr("min", 1).val(1).appendTo($div);
       
     });
   
   
-  var $button = $("<input>").attr("type", "button").val("+").addClass("btn btn-primary");
+	var $button = $("<input>").attr("type", "button").val("+").addClass("btn btn-primary");
   
-  $button.click(addLine);
+	$button.click(addLine);
   
-  $button.prependTo($form);
+	$button.prependTo($form);
   
-  $div.appendTo($form);
+	$("<p>").appendTo($form);
   
-  var $saveButton = $("<input>").attr("type", "button").val("Save").addClass("btn btn-primary");
+	var $dateParagraph = $("<p>").appendTo($form);
+	
+	var attributes = {
+			id : "trainingDate",
+			pattern : "[0-3]{1}[0-9]{1}\.[0-1]{1}[0-9]{1}\.[0-9]{4}",
+			maxlength : "10"
+	}
   
-  $saveButton.click(saveTrainingLog);
+	$("<input>").attr("type", "text").attr(attributes).val("01.01.2017").appendTo($dateParagraph);
   
-  $saveButton.appendTo($form);
+	$div.appendTo($form);
   
-  $("<p>").attr("id", "saveResult").appendTo($form);
+	var $saveButton = $("<input>").attr("type", "button").val("Save").addClass("btn btn-primary");
   
-  $form.appendTo("#contentArea");
+	$saveButton.click(saveTrainingLog);
+  
+	$saveButton.appendTo($form);
+  
+	$("<p>").attr("id", "saveResult").appendTo($form);
+  
+	$form.appendTo("#contentArea");
   
 
 }
 
+//It displays the form to add an exercise to the list.
 function showAddEntry(e) {
 
   e.preventDefault();
@@ -183,6 +198,7 @@ function saveExerciseForm() {
 		
 		var jsonString = JSON.stringify(exercise);
 		
+		//An Ajax POST request that saves an exercise (JSON format)
 		$.ajax({
 			method : "POST",
 			url : "/addExercise",
@@ -201,11 +217,12 @@ function saveExerciseForm() {
 	}
 }
 
+//adds a line in the Training Log section
 function addLine() {
 	
 	var $div = $(".form-group:last").clone();
 	
-	$div.find("input[type='button']").remove();
+	$div.find("input[type=number]").val(1);
 	
 	$div.insertAfter(".form-group:last");
 	 
@@ -223,46 +240,59 @@ function removeExercise(e) {
 	
 	var id = "#tr" + inputValue;
 	
+	//removes the exercise line from the DOM
 	$(id).remove();
 	
 	
 }
 
+//It saves the training log entry in the database
 function saveTrainingLog() {
 	
-	var s = [];
-    var $options = $("option:selected");
+	//check if the training data matches the pattern (the process is doubled in the HomeController)
+	if ($("#trainingDate").val().match(/[0-3]{1}[0-9]{1}\.[0-1]{1}[0-9]{1}\.[0-9]{4}/) == null || $("input[type=number]").val() < 1 || $("input[type=number]").val() == "")
+			$("#saveResult").text("Wrong date format or number less than 1 or missing!");
+	else
+	{	
+		var s = [];
+		var $options = $("option:selected");
 
-    $.each($options, function() {
-
-    if ($(this).val() != "")
-      {
-    	var trainingSetHelper = {};
-    	trainingSetHelper.id = $(this).val();
-    	
-    	var $number = $(this).parent().parent().next("input[type='number']");
-    	
-    	trainingSetHelper.quantity = $number.val();
-    	s.push(trainingSetHelper);
-      }
-
-  });
-    
-    var jsonString = JSON.stringify(s);
-    console.log(jsonString);
-    
-    $.ajax({
-		method : "POST",
-		url : "/saveTrainingLog",
-		data : jsonString,
-		contentType : "application/json",
-		success: function() {
-			$("#saveResult").text("Training log saved");
-		},
-		error: function() {
-			$("#saveResult").text("Failed to save the training log");
-		}
+	    $.each($options, function() {
 	
-	});
+	    //checks if the option with the exercise name is selected
+	    if ($(this).val() != "")
+	      {
+	    	var trainingSetHelper = {};
+	    	trainingSetHelper.id = $(this).val();
+	    	
+	    	//search for the input field with the required value;
+	    	var $number = $(this).closest(".col-sm-4").next("input[type='number']");
+	    	
+	    	trainingSetHelper.quantity = $number.val();
+	    	s.push(trainingSetHelper);
+	      }
+	
+	  });
+	    
+	    var jsonString = JSON.stringify(s);
+	    
+	    //remove before production - logs the JSON string to the console
+	    console.log(jsonString);
+	    
+	    //An Ajax request that saves the training log entry in the database
+	    $.ajax({
+			method : "POST",
+			url : "/saveTrainingLog" + "?date=" + $("#trainingDate").val(),
+			data : jsonString,
+			contentType : "application/json",
+			success: function() {
+				$("#saveResult").text("Training log saved " + $("#trainingDate").val());
+			},
+			error: function() {
+				$("#saveResult").text("Failed to save the training log");
+			}
+		
+		});
+	}
 	
 }

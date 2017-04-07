@@ -6,19 +6,10 @@ public class TrainingSetHelper {
 
 	private int quantity;
 
+	private String date;
+
 	public TrainingSetHelper() {
 	};
-
-	public TrainingSetHelper(int id, int quantity) {
-		super();
-		this.id = id;
-		this.quantity = quantity;
-	}
-
-	public TrainingSetHelper(int id) {
-		super();
-		this.id = id;
-	}
 
 	public int getId() {
 		return id;
@@ -34,6 +25,14 @@ public class TrainingSetHelper {
 
 	public void setQuantity(int quantity) {
 		this.quantity = quantity;
+	}
+
+	public String getDate() {
+		return date;
+	}
+
+	public void setDate(String date) {
+		this.date = date;
 	}
 
 }

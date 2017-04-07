@@ -1,5 +1,7 @@
 package com.zazdravnykh.training.controller;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.zazdravnykh.training.entity.Exercise;
@@ -56,7 +59,8 @@ public class HomeController {
 	}
 
 	@RequestMapping(value = "/saveTrainingLog", method = RequestMethod.POST, consumes = "application/json")
-	public @ResponseBody List<TrainingSet> saveTrainingLog(@RequestBody List<TrainingSetHelper> helperList) {
+	public @ResponseBody List<TrainingSet> saveTrainingLog(@RequestBody List<TrainingSetHelper> helperList,
+			@RequestParam("date") String trainingDate) {
 
 		List<TrainingSet> list = new ArrayList<>();
 
@@ -75,9 +79,14 @@ public class HomeController {
 
 		}
 
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+
+		LocalDate date = LocalDate.parse(trainingDate, formatter);
+
 		TrainingDay trainingDay = new TrainingDay();
 
 		trainingDay.setList(list);
+		trainingDay.setDate(date);
 
 		trainingDayService.saveTrainingDay(trainingDay);
 
