@@ -2,6 +2,7 @@ $(".home").click(showHomePage);
 $(".exercise-list").click(showExerciseList);
 $(".training-log").click(showTrainingLog);
 $(".add-entry").click(showAddEntry);
+$(".overview").click(showOverview);
 
 
 function showHomePage(e) {
@@ -19,7 +20,7 @@ function showExerciseList(e) {
 
   $("#contentArea").empty();
   
-  var $table = $("<table>").addClass("table");
+  var $table = $("<table>").addClass("table table-bordered");
   
   $tr = $("<tr>");
   $tr.append($("<th>").text("ID"));
@@ -294,5 +295,119 @@ function saveTrainingLog() {
 		
 		});
 	}
+	
+}
+
+function showOverview(e) {
+	
+	e.preventDefault();
+	
+	$("#contentArea").empty();
+	
+	var $table = $("<table>").addClass("table table-bordered");
+	
+	//create <thead> block
+	var $thead = $("<thead>");
+	var $tr = $("<tr>");
+	$tr.append($("<td>").text("Date"), $("<td>").text("Exercise"), $("<td>").text("Quantity"), $("<td>").text("Actions"));
+	$tr.appendTo($thead);
+	$thead.appendTo($table);
+	
+	
+	//create Training Day block <tbody>
+	
+	$.getJSON("/showAllTrainingDays", function(data) {
+		
+		$.each(data, function(index, trainingDay) {
+			
+			//length of the array of training sets
+			var length = trainingDay.list.length;
+			var $tbody = $("<tbody>").attr("id", "day" + trainingDay.id);
+			
+			$.each(trainingDay.list, function (setIndex, trainingSet) {
+				
+				var $trainingDay = $("<tr>");
+				
+				if (setIndex == 0)
+				{
+						$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year).appendTo($trainingDay);
+				}
+				$("<td>").text(trainingSet.exercise.name).appendTo($trainingDay);
+				$("<td>").text(trainingSet.number).appendTo($trainingDay);
+				var $td = $("<td>");
+				
+				var $button = $("<input>").attr("type", "button").val("Remove").addClass("btn btn-warning");
+				
+				$button.click({trainingSetId: trainingSet.id, trainingDayId: trainingDay.id}, removeTrainingSet);
+				
+				$button.appendTo($td);
+				
+				$td.appendTo($trainingDay);
+					
+				$trainingDay.appendTo($tbody);
+			});
+			
+			$tbody.appendTo($table);
+			
+		});
+		
+	});
+	
+	$table.appendTo("#contentArea");
+	
+}
+
+function removeTrainingSet(event) {
+	
+	var trainingDayId = event.data.trainingDayId;
+	var trainingSetId = event.data.trainingSetId;
+	
+	console.log(trainingDayId);
+	console.log(trainingSetId);
+	
+	$.ajax({
+		method : "POST",
+		url : "/removeTrainingSet/" + trainingDayId + "/" + trainingSetId,
+		success: function() {
+			var $tbody = $("<tbody>");
+			
+			$.getJSON("/showTrainingDay/" + trainingDayId, function(trainingDay) {
+				
+				var length = trainingDay.list.length;
+				
+				$tbody.attr("id", "day" + trainingDay.id);
+				
+				$.each(trainingDay.list, function (setIndex, trainingSet) {
+					
+					var $trainingDay = $("<tr>");
+					
+					if (setIndex == 0)
+					{
+							$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year).appendTo($trainingDay);
+					}
+					$("<td>").text(trainingSet.exercise.name).appendTo($trainingDay);
+					$("<td>").text(trainingSet.number).appendTo($trainingDay);
+					var $td = $("<td>");
+					
+					var $button = $("<input>").attr("type", "button").val("Remove").addClass("btn btn-warning");
+					
+					$button.click({trainingSetId: trainingSet.id, trainingDayId: trainingDay.id}, removeTrainingSet);
+					
+					$button.appendTo($td);
+					
+					$td.appendTo($trainingDay);
+						
+					$trainingDay.appendTo($tbody);
+				});
+				
+			});
+			
+			$("#day" + trainingDayId).replaceWith($tbody);
+		},
+		error: function() {
+			console.log("Failed to save the training log");
+		}
+	
+	});
 	
 }

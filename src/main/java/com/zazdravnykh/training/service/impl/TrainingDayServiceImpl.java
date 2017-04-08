@@ -1,11 +1,12 @@
 package com.zazdravnykh.training.service.impl;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.zazdravnykh.training.dao.ExerciseDAO;
 import com.zazdravnykh.training.dao.TrainingDayDAO;
-import com.zazdravnykh.training.entity.Exercise;
+import com.zazdravnykh.training.dao.TrainingSetDAO;
 import com.zazdravnykh.training.entity.TrainingDay;
 import com.zazdravnykh.training.entity.TrainingSet;
 import com.zazdravnykh.training.service.TrainingDayService;
@@ -14,21 +15,10 @@ import com.zazdravnykh.training.service.TrainingDayService;
 public class TrainingDayServiceImpl implements TrainingDayService {
 
 	@Autowired
-	ExerciseDAO exerciseDAO;
-
-	@Autowired
 	TrainingDayDAO trainingDayDAO;
 
-	@Override
-	public void addTrainingSet(int number, int exerciseId, TrainingDay trainingDay) {
-
-		Exercise exercise = exerciseDAO.findOne(exerciseId);
-
-		TrainingSet trainingSet = new TrainingSet(exercise, number);
-
-		trainingDay.getList().add(trainingSet);
-
-	}
+	@Autowired
+	TrainingSetDAO trainingSetDAO;
 
 	@Override
 	public void saveTrainingDay(TrainingDay trainingDay) {
@@ -42,6 +32,43 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 
 		trainingDayDAO.delete(id);
 
+	}
+
+	@Override
+	public void removeTrainingSet(int trainingSetId, int trainingDayId) {
+
+		TrainingDay trainingDay = trainingDayDAO.findOne(trainingDayId);
+
+		TrainingSet trainingSet = trainingSetDAO.findOne(trainingSetId);
+
+		List<TrainingSet> list = trainingDay.getList();
+
+		list.remove(trainingSet);
+
+		trainingDay.setList(list); // remove?
+
+		trainingDayDAO.save(trainingDay);
+
+	}
+
+	@Override
+	public List<TrainingDay> findAll() {
+
+		return trainingDayDAO.findAll();
+	}
+
+	@Override
+	public TrainingDay findOne(int id) {
+
+		return trainingDayDAO.findOne(id);
+	}
+
+	@Override
+	public List<TrainingSet> findAllTrainingSets(int id) {
+
+		TrainingDay trainingDay = trainingDayDAO.findOne(id);
+
+		return trainingDay.getList();
 	}
 
 }

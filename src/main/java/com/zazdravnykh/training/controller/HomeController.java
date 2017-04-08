@@ -94,4 +94,31 @@ public class HomeController {
 
 	}
 
+	@RequestMapping(value = "/showAllTrainingDays", method = RequestMethod.GET)
+	public @ResponseBody List<TrainingDay> showAllTrainingDays() {
+
+		return trainingDayService.findAll();
+	}
+
+	@RequestMapping(value = "/showTrainingDay/{id}", method = RequestMethod.GET)
+	public @ResponseBody TrainingDay showTrainingDay(@PathVariable("id") int trainingDayId) {
+
+		return trainingDayService.findOne(trainingDayId);
+	}
+
+	@RequestMapping(value = "/showTrainingSets/{id}", method = RequestMethod.GET)
+	public @ResponseBody List<TrainingSet> showTrainingSets(@PathVariable("id") int trainingDayId) {
+
+		return trainingDayService.findOne(trainingDayId).getList();
+	}
+
+	@RequestMapping(value = "/removeTrainingSet/{trainingDayId}/{trainingSetId}", method = RequestMethod.POST)
+	public @ResponseBody TrainingDay removeTrainingSet(@PathVariable("trainingDayId") int trainingDayId,
+			@PathVariable("trainingSetId") int trainingSetId) {
+
+		trainingDayService.removeTrainingSet(trainingSetId, trainingDayId);
+
+		return trainingDayService.findOne(trainingDayId);
+	}
+
 }
