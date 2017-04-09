@@ -4,6 +4,7 @@ $(".training-log").click(showTrainingLog);
 $(".add-entry").click(showAddEntry);
 $(".overview").click(showOverview);
 
+var contextPath = $("meta[name='ctx']").attr("content");
 
 function showHomePage(e) {
 
@@ -40,7 +41,7 @@ function showExerciseList(e) {
   
   var $tbody = $("<tbody>");
   
-  $.getJSON("/showExercises", function (data) {
+  $.getJSON(contextPath + "/showExercises", function (data) {
 	  
 	  $.each(data, function(key, exercise) {
 		  
@@ -97,7 +98,7 @@ function showTrainingLog(e) {
 	$select.append($("<option>").val("").text("....."));
   
 	//a request that gets a list of exercises.
-	$.getJSON("/showExercises", function(data) {
+	$.getJSON(contextPath + "/showExercises", function(data) {
 
       $.each(data, function(key, exercise) {
 
@@ -214,7 +215,7 @@ function saveExerciseForm() {
 		//An Ajax POST request that saves an exercise (JSON format)
 		$.ajax({
 			method : "POST",
-			url : "/addExercise",
+			url : contextPath + "/addExercise",
 			data : jsonString,
 			contentType : "application/json",
 			success: function() {
@@ -246,7 +247,7 @@ function removeExercise(e) {
 	var inputValue = $(e.target).prev("input").val();
 	
 	$.post({
-		url : "/removeExercise/" + inputValue,
+		url : contextPath + "/removeExercise/" + inputValue,
 		success : function() {
 			$("#statusLine").text("Exercise removed. Besides all entries in the training log with this exercise were also removed.")
 		}
@@ -293,7 +294,7 @@ function saveTrainingLog() {
 	    //An Ajax request that saves the training log entry in the database
 	    $.ajax({
 			method : "POST",
-			url : "/saveTrainingLog" + "?date=" + $("#trainingDate").val(),
+			url : contextPath + "/saveTrainingLog" + "?date=" + $("#trainingDate").val(),
 			data : jsonString,
 			contentType : "application/json",
 			success: function() {
@@ -326,7 +327,7 @@ function showOverview(e) {
 	
 	//create Training Day block <tbody>
 	
-	$.getJSON("/showAllTrainingDays", function(data) {
+	$.getJSON(contextPath + "/showAllTrainingDays", function(data) {
 		
 		$.each(data, function(index, trainingDay) {
 			
@@ -379,10 +380,10 @@ function removeTrainingSet(event) {
 	
 	$.ajax({
 		method : "POST",
-		url : "/removeTrainingSet/" + trainingDayId + "/" + trainingSetId,
+		url : contextPath + "/removeTrainingSet/" + trainingDayId + "/" + trainingSetId,
 		success: function() {
 			
-			$.getJSON("/showTrainingDay/" + trainingDayId, function(trainingDay) {
+			$.getJSON(contextPath + "/showTrainingDay/" + trainingDayId, function(trainingDay) {
 				
 				var length = trainingDay.list.length;
 				
@@ -445,7 +446,7 @@ function removeTrainingDay(event) {
 	$.ajax ({
 		
 		method : "DELETE",
-		url	   : "/removeTrainingDay/" + id,
+		url	   : contextPath + "/removeTrainingDay/" + id,
 		success : function() {
 			$("#day" + id).remove();
 			$("#statusLine").text("Training day removed");
