@@ -121,4 +121,12 @@ public class HomeController {
 		return trainingDayService.findOne(trainingDayId);
 	}
 
+	@RequestMapping(value = "/removeTrainingDay/{id}", method = RequestMethod.DELETE)
+	public @ResponseBody List<TrainingDay> removeTrainingDay(@PathVariable("id") int id) {
+
+		trainingDayService.deleteTrainingDay(id);
+
+		return trainingDayService.findAll();
+	}
+
 }

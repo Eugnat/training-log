@@ -18,4 +18,5 @@ public interface TrainingDayService {
 	TrainingDay findOne(int id);
 
 	List<TrainingSet> findAllTrainingSets(int trainingDayId);
+
 }

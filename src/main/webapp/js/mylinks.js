@@ -11,7 +11,11 @@ function showHomePage(e) {
 
   $("#contentArea").empty();
 
-  $("<p>").text("Home page").appendTo("#contentArea");
+  $("<p>").text("It is a demo web site that demonstrates use of jQuery to create a single-page application (SPA) with the Spring backend. The SPA uses AJAX/JSON requests to query the database.")
+          .appendTo("#contentArea");
+  $("<p>").text("Used technologies:").appendTo("#contentArea");
+  $("<p>").html("<ol><li>HTML/CSS/Bootstrap</li><li>jQuery 3</li><li>Spring Boot</li><li>JSON/REST</li><li>MySQL</li><li>Spring Data</li></ol>").appendTo("#contentArea");
+  $("<p>").html("The source code is available at <a href='https://github.com/Eugnat/training-log.git'>here</a>. Create the database <i>training-day</i> in MySQL while using a local copy and use the relevant user name and password.").appendTo("#contentArea");
 
 }
 
@@ -66,6 +70,8 @@ function showExerciseList(e) {
   $table.append($tbody);
   
   $table.appendTo($("#contentArea"));
+  
+  $("<p>").attr("id", "statusLine").appendTo("#contentArea");
 
 }
 
@@ -113,6 +119,12 @@ function showTrainingLog(e) {
 	$button.click(addLine);
   
 	$button.prependTo($form);
+	
+	var $clearButton = $("<input>").attr("type", "button").val("Clear").addClass("btn btn-primary");
+	
+	$clearButton.click(showTrainingLog);
+	
+	$clearButton.insertAfter($button);
   
 	$("<p>").appendTo($form);
   
@@ -233,10 +245,11 @@ function removeExercise(e) {
 	
 	var inputValue = $(e.target).prev("input").val();
 	
-	//console.log(inputValue);
-	
 	$.post({
-		url : "/removeExercise/" + inputValue
+		url : "/removeExercise/" + inputValue,
+		success : function() {
+			$("#statusLine").text("Exercise removed. Besides all entries in the training log with this exercise were also removed.")
+		}
 	});
 	
 	var id = "#tr" + inputValue;
@@ -276,9 +289,6 @@ function saveTrainingLog() {
 	  });
 	    
 	    var jsonString = JSON.stringify(s);
-	    
-	    //remove before production - logs the JSON string to the console
-	    console.log(jsonString);
 	    
 	    //An Ajax request that saves the training log entry in the database
 	    $.ajax({
@@ -330,7 +340,11 @@ function showOverview(e) {
 				
 				if (setIndex == 0)
 				{
-						$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year).appendTo($trainingDay);
+					var $removeButton = $("<input>").attr("type", "button").val("Remove").addClass("btn btn-warning");
+					$removeButton.click({id : trainingDay.id}, removeTrainingDay);
+					$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year)
+							 .append($("<p>").append($removeButton))
+							 .appendTo($trainingDay);
 				}
 				$("<td>").text(trainingSet.exercise.name).appendTo($trainingDay);
 				$("<td>").text(trainingSet.number).appendTo($trainingDay);
@@ -354,6 +368,7 @@ function showOverview(e) {
 	});
 	
 	$table.appendTo("#contentArea");
+	$("<p>").attr("id", "statusLine").appendTo("#contentArea");
 	
 }
 
@@ -362,18 +377,18 @@ function removeTrainingSet(event) {
 	var trainingDayId = event.data.trainingDayId;
 	var trainingSetId = event.data.trainingSetId;
 	
-	console.log(trainingDayId);
-	console.log(trainingSetId);
-	
 	$.ajax({
 		method : "POST",
 		url : "/removeTrainingSet/" + trainingDayId + "/" + trainingSetId,
 		success: function() {
-			var $tbody = $("<tbody>");
 			
 			$.getJSON("/showTrainingDay/" + trainingDayId, function(trainingDay) {
 				
 				var length = trainingDay.list.length;
+				
+				if (length > 0)
+				{	
+				var $tbody = $("<tbody>");
 				
 				$tbody.attr("id", "day" + trainingDay.id);
 				
@@ -383,7 +398,11 @@ function removeTrainingSet(event) {
 					
 					if (setIndex == 0)
 					{
-							$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year).appendTo($trainingDay);
+						var $removeButton = $("<input>").attr("type", "button").val("Remove").addClass("btn btn-warning");
+						$removeButton.click({id : trainingDay.id}, removeTrainingDay);
+						$("<td>").attr("rowspan", length).text(trainingDay.date.dayOfMonth + " " + trainingDay.date.month + " " + trainingDay.date.year)
+								 .append($("<p>").append($removeButton))
+								 .appendTo($trainingDay);
 					}
 					$("<td>").text(trainingSet.exercise.name).appendTo($trainingDay);
 					$("<td>").text(trainingSet.number).appendTo($trainingDay);
@@ -400,14 +419,39 @@ function removeTrainingSet(event) {
 					$trainingDay.appendTo($tbody);
 				});
 				
+				$("#day" + trainingDayId).replaceWith($tbody);
+				$("#statusLine").text("Training set removed");
+				}
+				else
+					{
+						$("#day" + trainingDayId).remove();
+						$("#statusLine").text("Training set removed");
+					}
 			});
 			
-			$("#day" + trainingDayId).replaceWith($tbody);
 		},
 		error: function() {
-			console.log("Failed to save the training log");
+			$("#statusLine").text("Failed to remove the training set");
 		}
 	
 	});
 	
+}
+
+function removeTrainingDay(event) {
+	
+	var id = event.data.id;
+	
+	$.ajax ({
+		
+		method : "DELETE",
+		url	   : "/removeTrainingDay/" + id,
+		success : function() {
+			$("#day" + id).remove();
+			$("#statusLine").text("Training day removed");
+		},
+		error  : function() {
+			$("#statusLine").text("Failed to remove the training day");
+			}
+		});
 }

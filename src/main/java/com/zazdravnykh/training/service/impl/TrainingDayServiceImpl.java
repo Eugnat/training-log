@@ -45,7 +45,7 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 
 		list.remove(trainingSet);
 
-		trainingDay.setList(list); // remove?
+		// trainingDay.setList(list); // remove?
 
 		trainingDayDAO.save(trainingDay);
 
