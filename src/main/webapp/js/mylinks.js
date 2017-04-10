@@ -46,7 +46,8 @@ function showExerciseList(e) {
 	  $.each(data, function(key, exercise) {
 		  
 		  $tr1 = $("<tr>").attr("id", "tr" + exercise.id);
-		  $("<td>").text(exercise.id).appendTo($tr1);
+		  //$("<td>").text(exercise.id).appendTo($tr1);
+		  $("<td>").appendTo($tr1);
 		  $("<td>").text(exercise.name).appendTo($tr1);
 		  
 		  var inputValue = exercise.id;
@@ -65,6 +66,12 @@ function showExerciseList(e) {
 		  $tr1.appendTo($tbody);
 		  
 	  });
+	  
+	  $("td:first", "tr").each(function(index) {
+		  
+		  $(this).text(index + 1);
+	  });
+	  
 	  
   });
   
@@ -220,6 +227,7 @@ function saveExerciseForm() {
 			contentType : "application/json",
 			success: function() {
 				$("#addExercise").text("Exercise added");
+				
 			},
 			error: function() {
 				$("#addExercise").text("Failed to add the exercise");
@@ -258,6 +266,10 @@ function removeExercise(e) {
 	//removes the exercise line from the DOM
 	$(id).remove();
 	
+	$("td:first", "tr").each(function(index) {
+		  
+		  $(this).text(index + 1);
+	  });
 	
 }
 

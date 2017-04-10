@@ -64,4 +64,11 @@ public class ExerciseServiceImpl implements ExerciseService {
 		return exerciseDAO.findOne(id);
 	}
 
+	@Override
+	public void deleteAll() {
+
+		exerciseDAO.deleteAll();
+
+	}
+
 }

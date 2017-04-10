@@ -14,4 +14,6 @@ public interface ExerciseService {
 
 	Exercise findOne(int id);
 
+	void deleteAll();
+
 }

@@ -71,4 +71,11 @@ public class TrainingDayServiceImpl implements TrainingDayService {
 		return trainingDay.getList();
 	}
 
+	@Override
+	public void deleteAll() {
+
+		trainingDayDAO.deleteAll();
+
+	}
+
 }

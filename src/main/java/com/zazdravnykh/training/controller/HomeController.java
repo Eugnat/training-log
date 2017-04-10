@@ -5,6 +5,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -127,6 +129,14 @@ public class HomeController {
 		trainingDayService.deleteTrainingDay(id);
 
 		return trainingDayService.findAll();
+	}
+
+	@PostConstruct
+	public void initializeDatabases() {
+
+		trainingDayService.deleteAll();
+
+		exerciseService.deleteAll();
 	}
 
 }

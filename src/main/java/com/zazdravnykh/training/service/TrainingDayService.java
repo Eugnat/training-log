@@ -19,4 +19,6 @@ public interface TrainingDayService {
 
 	List<TrainingSet> findAllTrainingSets(int trainingDayId);
 
+	void deleteAll();
+
 }
